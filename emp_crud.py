@@ -22,20 +22,21 @@ def show_employees():
 
         query = """
         MATCH (e:Employee)-[:BELONGS_TO]->(d:Department)
-        OPTIONAL MATCH (e)-[:MANAGES]->(m:Employee)
-        RETURN e, d.dname AS dept_name, m.ename AS manager_name
+        OPTIONAL MATCH (e)-[:MANAGES]->(mgr:Employee)
+        RETURN e.empno AS empno, e.ename AS ename, e.job AS job,
+               d.dname AS department, mgr.ename AS manager
         """
-        result = execute_query(query)  
-        
+        result = execute_query(query)
+
         for record in result:
-            emp = record["e"]
-            dept = record["dept_name"] or "None"
-            mgr = record["manager_name"] or "None"
-            emp_table.insert("", "end", text=emp["empno"], values=(emp["ename"], emp["job"], dept, mgr))
+            empno = record["empno"]
+            ename = record["ename"]
+            job = record["job"]
+            department = record["department"] or "None"
+            manager = record["manager"] or "None"
+            emp_table.insert("", "end", text=empno, values=(ename, job, department, manager))
     except Exception as e:
         messagebox.showerror("Error", str(e))
-
-
 
 def create_employee():
     try:
@@ -46,20 +47,15 @@ def create_employee():
         mgr_empno = mgr_entry.get()
 
         if empno and ename and job and deptno:
-            # Crear empleado
-            query = """
-            CREATE (e:Employee {empno: $empno, ename: $ename, job: $job})
-            """
+            query = "CREATE (e:Employee {empno: $empno, ename: $ename, job: $job})"
             execute_query(query, {"empno": empno, "ename": ename, "job": job})
 
-            # Establecer relación con departamento
             query = """
             MATCH (e:Employee {empno: $empno}), (d:Department {deptno: $deptno})
             CREATE (e)-[:BELONGS_TO]->(d)
             """
             execute_query(query, {"empno": empno, "deptno": deptno})
 
-            # Establecer relación con manager, si existe
             if mgr_empno:
                 query = """
                 MATCH (e:Employee {empno: $empno}), (mgr:Employee {empno: $mgr_empno})
@@ -91,14 +87,12 @@ def update_employee():
         mgr_empno = mgr_entry.get()
 
         if ename and job and deptno:
-            # Actualizar empleado
             query = """
             MATCH (e:Employee {empno: $empno})
             SET e.ename = $ename, e.job = $job
             """
             execute_query(query, {"empno": empno, "ename": ename, "job": job})
 
-            # Actualizar relación con departamento
             query = """
             MATCH (e:Employee {empno: $empno})-[r:BELONGS_TO]->(:Department)
             DELETE r
@@ -110,7 +104,6 @@ def update_employee():
             """
             execute_query(query, {"empno": empno, "deptno": deptno})
 
-            # Actualizar relación con manager
             query = """
             MATCH (e:Employee {empno: $empno})<-[r:MANAGES]-(:Employee)
             DELETE r
@@ -142,12 +135,11 @@ def delete_employee():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-# Interfaz gráfica
 root = Tk()
 root.title("Employees CRUD")
-root.geometry("800x500")
+root.geometry("800x600")
 
-Label(root, text="Emp No").grid(row=0, column=0, padx=10, pady=5)
+Label(root, text="Employee No").grid(row=0, column=0, padx=10, pady=5)
 empno_entry = Entry(root)
 empno_entry.grid(row=0, column=1, padx=10, pady=5)
 
@@ -159,7 +151,7 @@ Label(root, text="Job").grid(row=2, column=0, padx=10, pady=5)
 job_entry = Entry(root)
 job_entry.grid(row=2, column=1, padx=10, pady=5)
 
-Label(root, text="Dept No").grid(row=3, column=0, padx=10, pady=5)
+Label(root, text="Department No").grid(row=3, column=0, padx=10, pady=5)
 deptno_entry = Entry(root)
 deptno_entry.grid(row=3, column=1, padx=10, pady=5)
 
