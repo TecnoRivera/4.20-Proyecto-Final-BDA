@@ -10,7 +10,6 @@ driver = GraphDatabase.driver(uri, auth=(user, password))
 def close_connection():
     driver.close()
 
-
 def execute_query(query, parameters=None):
     with driver.session() as session:
         result = session.run(query, parameters)
@@ -29,10 +28,9 @@ def show_departments():
             deptno = dept.get("deptno", "Unknown")
             dname = dept.get("dname", "Unknown")
             location = dept.get("location", "Unknown")
-            dept_table.insert("", "end", text=deptno, values=(dname, location))
+            dept_table.insert("", "end", text=deptno, values=(deptno, dname, location))  
     except Exception as e:
         messagebox.showerror("Error", str(e))
-
 
 def create_department():
     try:
@@ -53,7 +51,6 @@ def create_department():
         show_departments()
     except Exception as e:
         messagebox.showerror("Error", str(e))
-
 
 def update_department():
     try:
@@ -81,7 +78,6 @@ def update_department():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-
 def delete_department():
     try:
         selected_item = dept_table.focus()
@@ -91,9 +87,13 @@ def delete_department():
 
         deptno = dept_table.item(selected_item, "text")
         query = """
+        MATCH (d:Department {deptno: $deptno})-[r]->()
+        DELETE r
+        """
+        execute_query(query, {"deptno": deptno})
+        query = """
         MATCH (d:Department {deptno: $deptno})
-        OPTIONAL MATCH (d)<-[:BELONGS_TO]-(e:Employee)
-        DELETE d, e
+        DELETE d
         """
         execute_query(query, {"deptno": deptno})
 
@@ -101,12 +101,10 @@ def delete_department():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-
 def clear_inputs():
     deptno_entry.delete(0, END)
     dname_entry.delete(0, END)
     location_entry.delete(0, END)
-
 
 root = Tk()
 root.title("Departments CRUD")
@@ -139,8 +137,10 @@ Button(frame_buttons, text="Add Department", command=create_department, bg="#4CA
 Button(frame_buttons, text="Update Department", command=update_department, bg="#FFC107", fg="black", width=15).pack(side=LEFT, padx=10)
 Button(frame_buttons, text="Delete Department", command=delete_department, bg="#FF5733", fg="white", width=15).pack(side=LEFT, padx=10)
 
-dept_table = ttk.Treeview(root, columns=("dname", "location"), show="headings")
+dept_table = ttk.Treeview(root, columns=("deptno", "dname", "location"), show="headings")  
 dept_table.pack(fill=BOTH, expand=True, pady=20, padx=20)
+
+dept_table.heading("deptno", text="Dept No")
 dept_table.heading("dname", text="Name")
 dept_table.heading("location", text="Location")
 
@@ -148,3 +148,4 @@ show_departments()
 
 root.mainloop()
 close_connection()
+

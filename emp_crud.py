@@ -34,7 +34,7 @@ def show_employees():
             job = record["job"]
             department = record["department"] or "None"
             manager = record["manager"] or "None"
-            emp_table.insert("", "end", text=empno, values=(ename, job, department, manager))
+            emp_table.insert("", "end", text=empno, values=(empno, ename, job, department, manager))
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -163,8 +163,9 @@ Button(root, text="Add Employee", command=create_employee).grid(row=5, column=0,
 Button(root, text="Update Employee", command=update_employee).grid(row=5, column=1, padx=10, pady=5)
 Button(root, text="Delete Employee", command=delete_employee).grid(row=6, column=0, padx=10, pady=5)
 
-emp_table = ttk.Treeview(root, columns=("ename", "job", "dept", "manager"), show="headings")
+emp_table = ttk.Treeview(root, columns=("empno", "ename", "job", "dept", "manager"), show="headings")
 emp_table.grid(row=7, column=0, columnspan=2, padx=10, pady=5)
+emp_table.heading("empno", text="Emp No")
 emp_table.heading("ename", text="Name")
 emp_table.heading("job", text="Job")
 emp_table.heading("dept", text="Department")
