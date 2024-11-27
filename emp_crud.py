@@ -152,7 +152,10 @@ def delete_employee(event=None):
             messagebox.showerror("Error", "Selecciona un empleado para eliminar")
             return
         empno = emp_table.item(selected_item, "text")
-        query = "MATCH (e:Employee {empno: $empno}) DETACH DELETE e"
+        query = """
+        MATCH (e:Employee {empno: $empno}) 
+        DETACH DELETE e
+        """
         execute_query(query, {"empno": empno})
         show_employees()
     except Exception as e:
@@ -160,44 +163,54 @@ def delete_employee(event=None):
 
 root = Tk()
 root.title("Employees CRUD")
-root.geometry("800x600")
+root.geometry("900x650")
+root.config(bg="#f4f4f9")
 
-Label(root, text="Employee No").grid(row=0, column=0, padx=10, pady=5)
-empno_entry = Entry(root)
+form_frame = Frame(root, bg="#f4f4f9", padx=20, pady=10)
+form_frame.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+Label(form_frame, text="Employee No", font=("Arial", 10)).grid(row=0, column=0, padx=10, pady=5)
+empno_entry = Entry(form_frame, font=("Arial", 10), bd=2)
 empno_entry.grid(row=0, column=1, padx=10, pady=5)
 
-Label(root, text="Name").grid(row=1, column=0, padx=10, pady=5)
-ename_entry = Entry(root)
+Label(form_frame, text="Name", font=("Arial", 10)).grid(row=1, column=0, padx=10, pady=5)
+ename_entry = Entry(form_frame, font=("Arial", 10), bd=2)
 ename_entry.grid(row=1, column=1, padx=10, pady=5)
 
-Label(root, text="Job").grid(row=2, column=0, padx=10, pady=5)
-job_entry = Entry(root)
+Label(form_frame, text="Job", font=("Arial", 10)).grid(row=2, column=0, padx=10, pady=5)
+job_entry = Entry(form_frame, font=("Arial", 10), bd=2)
 job_entry.grid(row=2, column=1, padx=10, pady=5)
 
-Label(root, text="Department No").grid(row=3, column=0, padx=10, pady=5)
-deptno_entry = Entry(root)
+Label(form_frame, text="Department No", font=("Arial", 10)).grid(row=3, column=0, padx=10, pady=5)
+deptno_entry = Entry(form_frame, font=("Arial", 10), bd=2)
 deptno_entry.grid(row=3, column=1, padx=10, pady=5)
 
-Label(root, text="Manager Emp No").grid(row=4, column=0, padx=10, pady=5)
-mgr_entry = Entry(root)
+Label(form_frame, text="Manager Emp No", font=("Arial", 10)).grid(row=4, column=0, padx=10, pady=5)
+mgr_entry = Entry(form_frame, font=("Arial", 10), bd=2)
 mgr_entry.grid(row=4, column=1, padx=10, pady=5)
 
-Button(root, text="Add Employee", command=create_employee).grid(row=5, column=0, padx=10, pady=5)
-update_btn = Button(root, text="Update Employee", command=update_employee)
-update_btn.grid(row=5, column=1, padx=10, pady=5)
-Button(root, text="Delete Employee", command=delete_employee).grid(row=6, column=0, padx=10, pady=5)
+button_frame = Frame(root, bg="#f4f4f9", pady=10)
+button_frame.grid(row=1, column=0, columnspan=2, padx=10)
 
-emp_table = ttk.Treeview(root, columns=("empno", "ename", "job", "dept", "manager"), show="headings")
-emp_table.grid(row=7, column=0, columnspan=2, padx=10, pady=5)
-emp_table.heading("empno", text="Emp No")
-emp_table.heading("ename", text="Name")
-emp_table.heading("job", text="Job")
-emp_table.heading("dept", text="Department")
-emp_table.heading("manager", text="Manager")
+Button(button_frame, text="Add Employee", font=("Arial", 10), bg="#4CAF50", fg="white", command=create_employee).grid(row=0, column=0, padx=10, pady=5)
+update_btn = Button(button_frame, text="Update Employee", font=("Arial", 10), bg="#2196F3", fg="white", command=update_employee)
+update_btn.grid(row=0, column=1, padx=10, pady=5)
+Button(button_frame, text="Delete Employee", font=("Arial", 10), bg="#F44336", fg="white", command=delete_employee).grid(row=0, column=2, padx=10, pady=5)
+
+emp_table = ttk.Treeview(root, columns=("empno", "ename", "job", "dept", "manager"), show="headings", height=8)
+emp_table.grid(row=2, column=0, columnspan=2, padx=20, pady=10)
+
+emp_table.heading("empno", text="Emp No", anchor=CENTER)
+emp_table.heading("ename", text="Name", anchor=CENTER)
+emp_table.heading("job", text="Job", anchor=CENTER)
+emp_table.heading("dept", text="Department", anchor=CENTER)
+emp_table.heading("manager", text="Manager", anchor=CENTER)
+
+emp_table.tag_configure("evenrow", background="#f9f9f9")
+emp_table.tag_configure("oddrow", background="#ffffff")
 
 emp_table.bind("<Double-1>", update_employee)
-
-emp_table.bind("<Double-3>", delete_employee)  
+emp_table.bind("<Double-3>", delete_employee)
 
 show_employees()
 
