@@ -74,13 +74,36 @@ def create_employee():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-def update_employee():
+def update_employee(event=None):
     try:
         selected_item = emp_table.focus()
         if not selected_item:
             messagebox.showerror("Error", "Selecciona un empleado para actualizar")
             return
+
         empno = emp_table.item(selected_item, "text")
+        ename = emp_table.item(selected_item, "values")[1]
+        job = emp_table.item(selected_item, "values")[2]
+        department = emp_table.item(selected_item, "values")[3]
+        manager = emp_table.item(selected_item, "values")[4]
+
+        empno_entry.delete(0, END)
+        empno_entry.insert(0, empno)
+        ename_entry.delete(0, END)
+        ename_entry.insert(0, ename)
+        job_entry.delete(0, END)
+        job_entry.insert(0, job)
+        deptno_entry.delete(0, END)
+        deptno_entry.insert(0, department if department != "None" else "")
+        mgr_entry.delete(0, END)
+        mgr_entry.insert(0, manager if manager != "None" else "")
+
+        update_btn.config(command=lambda: update_employee_from_ui(empno))
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def update_employee_from_ui(empno):
+    try:
         ename = ename_entry.get()
         job = job_entry.get()
         deptno = deptno_entry.get()
@@ -122,7 +145,7 @@ def update_employee():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
-def delete_employee():
+def delete_employee(event=None):
     try:
         selected_item = emp_table.focus()
         if not selected_item:
@@ -160,7 +183,8 @@ mgr_entry = Entry(root)
 mgr_entry.grid(row=4, column=1, padx=10, pady=5)
 
 Button(root, text="Add Employee", command=create_employee).grid(row=5, column=0, padx=10, pady=5)
-Button(root, text="Update Employee", command=update_employee).grid(row=5, column=1, padx=10, pady=5)
+update_btn = Button(root, text="Update Employee", command=update_employee)
+update_btn.grid(row=5, column=1, padx=10, pady=5)
 Button(root, text="Delete Employee", command=delete_employee).grid(row=6, column=0, padx=10, pady=5)
 
 emp_table = ttk.Treeview(root, columns=("empno", "ename", "job", "dept", "manager"), show="headings")
@@ -170,6 +194,10 @@ emp_table.heading("ename", text="Name")
 emp_table.heading("job", text="Job")
 emp_table.heading("dept", text="Department")
 emp_table.heading("manager", text="Manager")
+
+emp_table.bind("<Double-1>", update_employee)
+
+emp_table.bind("<Double-3>", delete_employee)  
 
 show_employees()
 

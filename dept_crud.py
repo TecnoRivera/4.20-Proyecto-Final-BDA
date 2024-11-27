@@ -106,6 +106,39 @@ def clear_inputs():
     dname_entry.delete(0, END)
     location_entry.delete(0, END)
 
+def on_item_double_click(event):
+    selected_item = dept_table.focus()
+    if selected_item:
+        deptno = dept_table.item(selected_item, "text")
+        dname = dept_table.item(selected_item, "values")[1]
+        location = dept_table.item(selected_item, "values")[2]
+
+        deptno_entry.delete(0, END)
+        deptno_entry.insert(0, deptno)
+        dname_entry.delete(0, END)
+        dname_entry.insert(0, dname)
+        location_entry.delete(0, END)
+        location_entry.insert(0, location)
+
+        update_btn.config(command=lambda: update_department_from_ui(deptno))
+
+def update_department_from_ui(deptno):
+    dname = dname_entry.get()
+    location = location_entry.get()
+
+    if not all([dname, location]):
+        messagebox.showerror("Error", "Todos los campos son obligatorios")
+        return
+
+    query = """
+    MATCH (d:Department {deptno: $deptno})
+    SET d.dname = $dname, d.location = $location
+    """
+    execute_query(query, {"deptno": deptno, "dname": dname, "location": location})
+
+    clear_inputs()
+    show_departments()
+
 root = Tk()
 root.title("Departments CRUD")
 root.geometry("800x500")
@@ -134,7 +167,8 @@ frame_buttons = Frame(root, bg="#f4f4f4")
 frame_buttons.pack(pady=10)
 
 Button(frame_buttons, text="Add Department", command=create_department, bg="#4CAF50", fg="white", width=15).pack(side=LEFT, padx=10)
-Button(frame_buttons, text="Update Department", command=update_department, bg="#FFC107", fg="black", width=15).pack(side=LEFT, padx=10)
+update_btn = Button(frame_buttons, text="Update Department", command=update_department, bg="#FFC107", fg="black", width=15)
+update_btn.pack(side=LEFT, padx=10)
 Button(frame_buttons, text="Delete Department", command=delete_department, bg="#FF5733", fg="white", width=15).pack(side=LEFT, padx=10)
 
 dept_table = ttk.Treeview(root, columns=("deptno", "dname", "location"), show="headings")  
@@ -144,8 +178,9 @@ dept_table.heading("deptno", text="Dept No")
 dept_table.heading("dname", text="Name")
 dept_table.heading("location", text="Location")
 
+dept_table.bind("<Double-1>", on_item_double_click)
+
 show_departments()
 
 root.mainloop()
 close_connection()
-
